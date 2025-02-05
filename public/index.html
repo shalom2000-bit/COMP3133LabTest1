@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat App</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div>
+        <h2>Chat Room</h2>
+        <select id="roomSelect">
+            <option value="devops">DevOps</option>
+            <option value="cloud">Cloud Computing</option>
+        </select>
+        <button onclick="joinRoom()">Join</button>
+    </div>
+    <div id="chatArea">
+        <div id="messages"></div>
+        <input type="text" id="messageInput" placeholder="Type a message..." onkeypress="sendTyping()">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <script>
+        const socket = io();
+        let currentRoom = '';
+
+        function joinRoom() {
+            currentRoom = document.getElementById('roomSelect').value;
+            socket.emit('joinRoom', currentRoom);
+            document.getElementById('messages').innerHTML = '';
+        }
+
+        function sendMessage() {
+            const message = document.getElementById('messageInput').value;
+            socket.emit('message', { user: 'User1', room: currentRoom, message });
+            document.getElementById('messageInput').value = '';
+        }
+
+        socket.on('message', (data) => {
+            document.getElementById('messages').innerHTML += `<p><b>${data.user}:</b> ${data.message}</p>`;
+        });
+
+        function sendTyping() {
+            socket.emit('typing', { user: 'User1', room: currentRoom });
+        }
+    </script>
+</body>
+</html>
